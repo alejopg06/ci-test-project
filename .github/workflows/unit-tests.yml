@@ -1,0 +1,29 @@
+name: Run Unit Tests (Multi-language)
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        language: [java, javascript, python, csharp]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up environment for ${{ matrix.language }}
+        run: |
+          if [ "${{ matrix.language }}" == "java" ]; then sudo apt install -y maven; fi
+          if [ "${{ matrix.language }}" == "javascript" ]; then sudo apt install -y nodejs npm; fi
+          if [ "${{ matrix.language }}" == "python" ]; then sudo apt install -y python3 python3-pip; fi
+          if [ "${{ matrix.language }}" == "csharp" ]; then sudo apt install -y dotnet-sdk-7.0; fi
+
+      - name: Run tests
+        run: |
+          if [ "${{ matrix.language }}" == "java" ]; then cd java && mvn test; fi
+          if [ "${{ matrix.language }}" == "javascript" ]; then cd js && npm install && npm test; fi
+          if [ "${{ matrix.language }}" == "python" ]; then cd python && pip install -r requirements.txt && pytest; fi
+          if [ "${{ matrix.language }}" == "csharp" ]; then cd csharp/CSharpTests && dotnet test; fi
